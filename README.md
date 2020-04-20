@@ -1,0 +1,120 @@
+# gcp-gke-hardened
+
+# Description
+Terraform state bucket and workspaces are utilised to allow multiple deployments.
+
+The terraform script consists of 2 stages:
+1. Bootstrap deployment
+1. Component deployment
+
+# Usage
+## Booststrap
+This stage deploys the following components:
+* GCS Bucket for terraform state
+* KMS Key Ring
+* KMS Key Crypto Key
+
+## Components
+This stage deploys the following components:
+* VPC
+* Subnetworks
+* Firewall Rules
+* NAT Router
+* GKE cluster
+
+## Pre-requisites
+Create the file named bootstrap/vars/bootstrap.tfvars and populate variables accordingly.
+```
+region                  = "europe-west2"
+project_id              = "gcp-project-id"
+project_name            = "my-project"
+project_sponsor         = "joe-bloggs"
+project_technical_lead  = "joe-bloggs"
+cost_code               = "123456"
+business_name           = "dept-1"
+creator                 = "owner"
+```
+
+Create the file named vars/ws-dev1.tfvars and populate variables accordingly.
+```
+region                  = "europe-west2"
+project_id              = "gcp-project-id"
+project_name            = "my-project"
+project_sponsor         = "joe-bloggs"
+project_technical_lead  = "joe-bloggs"
+cost_code               = "123456"
+business_name           = "dept-1"
+creator                 = "owner"
+
+gke_subnetwork = {
+  name         = "gke"
+  cidr         = "10.0.32.0/24"
+  pod_cidr     = "10.32.0.0/17"
+  pod_name     = "gke-pod"
+  service_cidr = "10.32.128.0/20"
+  service_name = "gke-service"
+
+}
+
+gke_master_ipv4_cidr_block          = "172.16.0.0/28"
+```
+
+## Bootstrap
+As part of bootstrap deployment, Terraform checks and tries to activate missing APIs. If it doesn't have enough privileges to activate a missing API, it will fail. If this happens, to successfully deploy the bootstrap, activate the following APIs through other means:
+
+```
+cloudkms.googleapis.com
+compute.googleapis.com
+container.googleapis.com
+iam.googleapis.com
+storage-api.googleapis.com
+```
+
+The commands below will download the required terraform executable and initialise the terraform state bucket.
+```
+make setup (optional)
+WS=dev1 make bootstrap-init
+WS=dev1 make bootstrap-plan
+WS=dev1 make bootstrap-apply
+```
+
+## Component Deployment
+The commands below will deploy the infrastructure components to GCP.
+```
+WS=dev1 make init 
+WS=dev1 make plan 
+WS=dev1 make apply
+```
+
+## Component Deletion
+The commands below will destroy the infrastructure components in GCP.
+```
+WS=dev1 make destroy
+ ```
+
+## Deletion of a component, e.g. GKE
+The commands below will destroy the selected infrastructure components and related dependencies in GCP.
+```
+WS=dev1 RESOURCE=module.gke make destroy-target
+```
+
+## (Mostly) complete deletion of all resources
+The commands will destroy the Component Deployment as well as the bootstrap deployment
+```
+WS=dev1 make destroy
+WS=dev1 make clean
+WS=dev1 make bootstrap-destroy
+WS=dev1 make bootstrap-clean
+```
+
+NOTE: This process is mostly complete as the Cloud KMS keys and key rings are left behind as currently there isn't a process to delete all key versions
+
+## Deploy into another terraform workspace
+Create the file named vars/ws-*dev2*.tfvars and populate variables accordingly.
+
+The command below will deploy all the components into the terraform workspace *dev2*.
+```
+WS=dev2 make init 
+WS=dev2 make plan 
+WS=dev2 make apply
+```
