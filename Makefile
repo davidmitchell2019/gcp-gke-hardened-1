@@ -1,14 +1,10 @@
-.PHONY= help setup init plan apply apply2 destroy destroy-force destroy-target refresh clean validate all bootstrap-all
+.PHONY= help init plan apply apply2 destroy destroy-force destroy-target refresh clean validate all bootstrap-all
 .ONESHELL:
 SHELL := /bin/bash
 BIN_DIR=~/bin
 BOOTSTRAP_TFVARS=vars/bootstrap.tfvars
 KMS_KEY ?=$(shell cat bootstrap/kms_key.out)
-OS ?=linux
-PACKER_VERSION ?=1.4.4
-PACKER_BIN=packer
 PLAN_FILE=plan-$(WS).out
-PROJECT_NAME ?=$(shell cat bootstrap/project_name.out)
 TERRAFORM_VERSION ?=0.12.8
 TERRAFORM_BIN=terraform
 TERRAFORM_BUCKET ?=$(shell cat bootstrap/terraform_bucket_name.out)
@@ -42,30 +38,6 @@ set-env:
 		exit 1; \
 	fi
 
-setup:
-	@echo "setup ..."
-	@if [ ! -d $(BIN_DIR) ]; then \
-		echo "Creating bin folder: $(BIN_DIR)" ;\
-		mkdir $(BIN_DIR) ;\
-	 fi
-
-	@if [ ! -f $(BIN_DIR)/$(TERRAFORM_BIN) ]; then \
-		curl -sLo /tmp/terraform.zip https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_$(OS)_amd64.zip && \
-		unzip -d /tmp /tmp/terraform.zip && \
-		mv /tmp/terraform $(BIN_DIR) && \
-		rm /tmp/terraform.zip; \
-	fi
-	-$(TERRAFORM_BIN) version
-
-
-	@if [ ! -f $(BIN_DIR)/$(PACKER_BIN) ]; then \
-		curl -sLo /tmp/packer.zip https://releases.hashicorp.com/packer/$(PACKER_VERSION)/packer_$(PACKER_VERSION)_$(OS)_amd64.zip && \
-		unzip -d /tmp /tmp/packer.zip && \
-		mv /tmp/packer $(BIN_DIR) && \
-		rm /tmp/packer.zip; \
-	fi
-	-$(PACKER_BIN) version
-
 bootstrap-all: bootstrap-init bootstrap-plan bootstrap-apply
 
 bootstrap-init:
@@ -97,8 +69,7 @@ bootstrap-apply:
 		bootstrap.out && \
 	rm bootstrap.out && \
 	$(TERRAFORM_BIN) output terraform_bucket_name > terraform_bucket_name.out && \
-	$(TERRAFORM_BIN) output kms_key > kms_key.out && \
-	$(TERRAFORM_BIN) output project_name > project_name.out
+	$(TERRAFORM_BIN) output kms_key > kms_key.out
 
 bootstrap-output:
 	@echo "$@ ..."
@@ -128,7 +99,7 @@ init: set-env
 	@$(TERRAFORM_BIN) init \
 		-backend=true \
 		-backend-config="bucket=$(TERRAFORM_BUCKET)" \
-		-backend-config="prefix=$(PROJECT_NAME)/terraform.tfstate" \
+		-backend-config="prefix=terraform.tfstate" \
 		-var-file="$(WS_TFVARS)" \
 		-var="kms_key=$(KMS_KEY)"
 	@echo "Switching to workspace $(WS)"

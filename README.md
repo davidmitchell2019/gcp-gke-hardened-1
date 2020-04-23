@@ -72,39 +72,43 @@ storage-api.googleapis.com
 
 The commands below will download the required terraform executable and initialise the terraform state bucket.
 ```
-make setup (optional)
-WS=dev1 make bootstrap-init
-WS=dev1 make bootstrap-plan
-WS=dev1 make bootstrap-apply
+export WS=dev1
+make bootstrap-init
+make bootstrap-plan
+make bootstrap-apply
 ```
 
 ## Component Deployment
 The commands below will deploy the infrastructure components to GCP.
 ```
-WS=dev1 make init 
-WS=dev1 make plan 
-WS=dev1 make apply
+export WS=dev1
+make init 
+make plan 
+make apply
 ```
 
 ## Component Deletion
 The commands below will destroy the infrastructure components in GCP.
 ```
-WS=dev1 make destroy
+export WS=dev1
+make destroy
  ```
 
 ## Deletion of a component, e.g. GKE
 The commands below will destroy the selected infrastructure components and related dependencies in GCP.
 ```
-WS=dev1 RESOURCE=module.gke make destroy-target
+export WS=dev1
+RESOURCE=module.gke make destroy-target
 ```
 
 ## (Mostly) complete deletion of all resources
 The commands will destroy the Component Deployment as well as the bootstrap deployment
 ```
-WS=dev1 make destroy
-WS=dev1 make clean
-WS=dev1 make bootstrap-destroy
-WS=dev1 make bootstrap-clean
+export WS=dev1
+make destroy
+make clean
+make bootstrap-destroy
+make bootstrap-clean
 ```
 
 NOTE: This process is mostly complete as the Cloud KMS keys and key rings are left behind as currently there isn't a process to delete all key versions
@@ -114,9 +118,10 @@ Create the file named vars/ws-*dev2*.tfvars and populate variables accordingly.
 
 The command below will deploy all the components into the terraform workspace *dev2*.
 ```
-WS=dev2 make init 
-WS=dev2 make plan 
-WS=dev2 make apply
+export WS=dev2
+make init 
+make plan 
+make apply
 ```
 
 ## Useful commands
@@ -142,7 +147,7 @@ gcloud compute start-iap-tunnel $(terraform output automation_name) 3128 \
   --zone $(terraform output automation_zone)
 ```
 
-Check status of metadata startup script
+Check status of metadata startup script (wait upto 10 mins for the script to complete)
 ```shell script
 gcloud compute ssh $(terraform output automation_name) \
   --zone $(terraform output automation_zone) \
@@ -155,7 +160,7 @@ GKE Cluster connectivity
 gcloud container clusters get-credentials $(terraform output gke_cluster_name) \
   --region $(terraform output region)
 
-http_proxy=localhost:3128 kubectl get nodes
+HTTPS_PROXY=localhost:3128 kubectl get nodes
 
-http_proxy=localhost:3128 kubectl get all
+HTTPS_PROXY=localhost:3128 kubectl get all
 ```
