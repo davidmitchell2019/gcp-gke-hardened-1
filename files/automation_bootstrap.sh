@@ -10,11 +10,11 @@ chmod +x ./kubectl
 mv ./kubectl /usr/local/bin/kubectl
 kubectl version --client=true
 
-yum install -y git
-yum update -y
+yum install -y git htop vim squid
 
-yum install -y squid
-sed -i "s/http_access deny all/http_access allow all/g" /etc/squid/squid.conf
+# Add IAP source CIDR
+echo "acl localnet src 35.235.240.0/20" | tee -a /etc/squid/squid.conf
+
 systemctl enable squid
 systemctl start squid
 

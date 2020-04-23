@@ -21,3 +21,7 @@ output "gke_cluster_name" {
 output "gke_node_locations" {
   value = join(", ", local.gke_node_locations)
 }
+
+output "region" {
+  value = var.region
+}

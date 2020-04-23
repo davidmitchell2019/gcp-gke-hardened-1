@@ -118,3 +118,44 @@ WS=dev2 make init
 WS=dev2 make plan 
 WS=dev2 make apply
 ```
+
+## Useful commands
+SSH connectivity to automation host via IAP
+```shell script
+gcloud compute ssh $(terraform output automation_name) \
+  --zone $(terraform output automation_zone) \
+  --tunnel-through-iap
+```
+
+SSH connectivity to automation host via IAP with proxy forwarding to localhost:3128
+```shell script
+gcloud compute ssh $(terraform output automation_name) \
+  --zone $(terraform output automation_zone) \
+  --tunnel-through-iap \
+  -- -L 3128:localhost:3128
+```
+
+IAP proxy forwarding to localhost:3128
+```shell script
+gcloud compute start-iap-tunnel $(terraform output automation_name) 3128 \
+  --local-host-port localhost:3128 \
+  --zone $(terraform output automation_zone)
+```
+
+Check status of metadata startup script
+```shell script
+gcloud compute ssh $(terraform output automation_name) \
+  --zone $(terraform output automation_zone) \
+  --tunnel-through-iap 
+  --command "sudo tail /var/log/bootstrap.log -f"
+```
+
+GKE Cluster connectivity
+```shell script
+gcloud container clusters get-credentials $(terraform output gke_cluster_name) \
+  --region $(terraform output region)
+
+http_proxy=localhost:3128 kubectl get nodes
+
+http_proxy=localhost:3128 kubectl get all
+```

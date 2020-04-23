@@ -78,8 +78,7 @@ bootstrap-init:
 bootstrap-validate:
 	@echo "Validating bootstrap terraform backend"
 	@cd bootstrap && \
-	$(TERRAFORM_BIN) validate \
-		-var-file="$(BOOTSTRAP_TFVARS)"
+	$(TERRAFORM_BIN) validate
 
 bootstrap-plan: bootstrap-init
 	@echo "Planning bootstrap terraform ..."
@@ -88,7 +87,6 @@ bootstrap-plan: bootstrap-init
 		-input=false \
 		-refresh=true \
 		-var-file="$(BOOTSTRAP_TFVARS)" \
-		-var kms_key="${KMS_KEY}" \
 		-out=bootstrap.out
 
 bootstrap-apply:
@@ -130,8 +128,9 @@ init: set-env
 	@$(TERRAFORM_BIN) init \
 		-backend=true \
 		-backend-config="bucket=$(TERRAFORM_BUCKET)" \
-		-backend-config="prefix=$(PROJECT_NAME)/terraform.tfstate \
-		-var-file="$(WS_TFVARS)"
+		-backend-config="prefix=$(PROJECT_NAME)/terraform.tfstate" \
+		-var-file="$(WS_TFVARS)" \
+		-var="kms_key=$(KMS_KEY)"
 	@echo "Switching to workspace $(WS)"
 	@$(TERRAFORM_BIN) workspace select $(WS) || $(TERRAFORM_BIN) workspace new $(WS)
 
@@ -143,7 +142,8 @@ refresh: set-env prep
 	@echo "$@ ..."
 	@$(TERRAFORM_BIN) refresh \
 		-input=false \
-		-var-file="$(WS_TFVARS)"
+		-var-file="$(WS_TFVARS)" \
+        -var="kms_key=$(KMS_KEY)"
 
 update-modules:
 	@echo "$@ ..."
@@ -152,8 +152,7 @@ update-modules:
 
 validate: set-env prep
 	@echo "$@ ..."
-	@$(TERRAFORM_BIN) validate \
-		-var-file="$(WS_TFVARS)"
+	@$(TERRAFORM_BIN) validate
 
 plan: set-env prep
 	@echo "$@ ..."
@@ -161,6 +160,7 @@ plan: set-env prep
 		-input=false \
 		-refresh=true \
 		-var-file="$(WS_TFVARS)" \
+		-var="kms_key=$(KMS_KEY)" \
 		-out=$(PLAN_FILE)
 
 apply: set-env prep
@@ -176,6 +176,7 @@ apply2: set-env prep
 		-input=false \
 		-refresh=true \
 		-var-file="$(WS_TFVARS)" \
+		-var="kms_key=$(KMS_KEY)"
 
 destroy: set-env prep
 	@echo "destroy ..."
@@ -203,6 +204,7 @@ destroy-target: set-env prep
 		-input=false \
 		-refresh=true \
 		-var-file="$(WS_TFVARS)" \
+		-var kms_key=="$(KMS_KEY)" \
 		-target $(RESOURCE)
 
 taint: set-env prep
