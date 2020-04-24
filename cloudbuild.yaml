@@ -1,32 +1,44 @@
 ---
 steps:
-- name: gcr.io/${_PROJECT}/gcp-devops:latest
+- name: gcr.io/${PROJECT_ID}/gcp-devops:latest
   id: tf-fmt
   entrypoint: terraform
   args:
   - fmt
   - -recursive
   - -check
-- name: gcr.io/${_PROJECT}/gcp-devops:latest
+- name: gcr.io/${PROJECT_ID}/gcp-devops:latest
   id: tf-init
   entrypoint: bash
   env:
-    - "TF_VAR_project_id=${_PROJECT}"
+    - "TF_VAR_project_id=${PROJECT_ID}"
     - "TF_VAR_kms_key=${_KMS_KEY}"
   args:
     - '-c'
     - |
       test -f back_end.tf && rm back_end.tf
       terraform init
-- name: gcr.io/${_PROJECT}/gcp-devops:latest
+- name: gcr.io/${PROJECT_ID}/gcp-devops:latest
   id: tf-plan
   entrypoint: bash
   env:
-    - "TF_VAR_project_id=${_PROJECT}"
+    - "TF_VAR_project_id=${PROJECT_ID}"
     - "TF_VAR_kms_key=${_KMS_KEY}"
   args:
     - '-c'
     - |
+      # fudge to workaroung late evaluation
+      sed -i 's/subnetwork\s*= module.private_subnet.name/subnetwork = "default"/g' automation.tf
       terraform plan \
         -var-file=./vars/cloudbuild.tfvars \
         -out=terraform.tfplan
+      terraform show -json terraform.tfplan > terraform.tfplan.json
+- name: gcr.io/${PROJECT_ID}/gcp-devops:latest
+  id: tf-validator
+  entrypoint: terraform-validator
+  args:
+    - validate
+    - terraform.tfplan.json
+    - --policy-path=./policy-library/
+    - --project
+    - ${PROJECT_ID}
