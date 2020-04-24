@@ -1,0 +1,32 @@
+---
+steps:
+- name: gcr.io/${_PROJECT}/gcp-devops:latest
+  id: tf-fmt
+  entrypoint: terraform
+  args:
+  - fmt
+  - -recursive
+  - -check
+- name: gcr.io/${_PROJECT}/gcp-devops:latest
+  id: tf-init
+  entrypoint: bash
+  env:
+    - "TF_VAR_project_id=${_PROJECT}"
+    - "TF_VAR_kms_key=${_KMS_KEY}"
+  args:
+    - '-c'
+    - |
+      test -f back_end.tf && rm back_end.tf
+      terraform init
+- name: gcr.io/${_PROJECT}/gcp-devops:latest
+  id: tf-plan
+  entrypoint: bash
+  env:
+    - "TF_VAR_project_id=${_PROJECT}"
+    - "TF_VAR_kms_key=${_KMS_KEY}"
+  args:
+    - '-c'
+    - |
+      terraform plan \
+        -var-file=./vars/cloudbuild.tfvars \
+        -out=terraform.tfplan
