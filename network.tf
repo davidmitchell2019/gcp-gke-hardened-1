@@ -20,6 +20,9 @@ module "vpc" {
 ###
 module "private_subnet" {
   source = "./modules/gcp-subnet"
+  providers = {
+    google = google-beta
+  }
 
   enable_flow_logs         = var.enable_flow_logs
   ip_cidr_range            = cidrsubnet(var.network_cidr, 8, 1)
@@ -31,6 +34,9 @@ module "private_subnet" {
 
 module "gke_subnet" {
   source = "./modules/gcp-subnet"
+  providers = {
+    google = google-beta
+  }
 
   enable_flow_logs         = var.enable_flow_logs
   ip_cidr_range            = var.gke_subnetwork["cidr"]
@@ -49,6 +55,22 @@ module "gke_subnet" {
       ip_cidr_range = var.gke_subnetwork["service_cidr"]
     }
   ]
+}
+
+module "ilb_subnet" {
+  source = "./modules/gcp-subnet"
+  providers = {
+    google = google-beta
+  }
+
+  enable_flow_logs         = var.enable_flow_logs
+  ip_cidr_range            = cidrsubnet(var.network_cidr, 8, 2)
+  network                  = module.vpc.name
+  private_ip_google_access = false
+  purpose                  = "INTERNAL_HTTPS_LOAD_BALANCER"
+  region                   = var.region
+  role                     = "ACTIVE"
+  subnet_name              = format("%s-%s", "ilb-net", random_id.this.hex)
 }
 
 ###

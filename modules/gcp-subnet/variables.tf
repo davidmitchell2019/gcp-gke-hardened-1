@@ -37,3 +37,15 @@ variable "secondary_ip_ranges" {
   description = "secondary ip CIDR ranges"
   default     = []
 }
+
+variable "purpose" {
+  type        = string
+  description = "Purpose of the resource, used by INTERNAL_HTTPS_LOAD_BALANCER"
+  default     = null
+}
+
+variable "role" {
+  type        = string
+  description = "Used by INTERNAL_HTTPS_LOAD_BALANCER"
+  default     = null
+}

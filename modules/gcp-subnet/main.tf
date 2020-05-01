@@ -4,6 +4,8 @@ resource "google_compute_subnetwork" "default" {
   region                   = var.region
   network                  = var.network
   private_ip_google_access = var.private_ip_google_access
+  purpose                  = var.purpose
+  role                     = var.role
 
   dynamic "log_config" {
     for_each = local.enable_flow_logs
