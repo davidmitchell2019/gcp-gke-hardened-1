@@ -82,8 +82,8 @@ variable "automation_startup_filename" {
 variable "machine_type" {
   type = map(string)
   default = {
-    automation : "n1-standard-1"
-    gke : "n1-standard-2"
+    automation : "g1-small"
+    gke : "n1-standard-1"
   }
   description = "Machine type"
 }
@@ -174,6 +174,11 @@ variable "gke_istio_permissive_mtls" {
   default = false
 }
 
+variable "gke_release_channel" {
+  type        = string
+  default     = "STABLE"
+  description = "Specify the release channel"
+}
 variable "project_name" {
   type = string
 }
