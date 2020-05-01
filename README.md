@@ -151,7 +151,7 @@ Check status of metadata startup script (wait upto 10 mins for the script to com
 ```shell script
 gcloud compute ssh $(terraform output automation_name) \
   --zone $(terraform output automation_zone) \
-  --tunnel-through-iap 
+  --tunnel-through-iap \
   --command "sudo tail /var/log/bootstrap.log -f"
 ```
 

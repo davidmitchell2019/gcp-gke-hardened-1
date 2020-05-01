@@ -24,6 +24,7 @@ module "gke" {
   istio_permissive_mtls         = var.gke_istio_permissive_mtls
   node_locations                = local.gke_node_locations
   region                        = var.region
+  release_channel               = var.gke_release_channel
 }
 
 ###
