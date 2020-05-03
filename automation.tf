@@ -6,7 +6,7 @@ module "automation" {
 
   boot_disk_size = var.boot_disk_size["automation"]
   boot_disk_type = var.boot_disk_type["automation"]
-  image          = data.google_compute_image.rhel7.self_link
+  image          = data.google_compute_image.centos7.self_link
   common_labels  = module.labels.rendered
   kms_key        = var.kms_key
   machine_type   = var.machine_type["automation"]
