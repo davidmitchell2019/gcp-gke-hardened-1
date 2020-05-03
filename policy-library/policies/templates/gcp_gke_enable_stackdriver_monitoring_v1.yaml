@@ -70,6 +70,7 @@ spec:
             ###########################
             stackdriver_monitoring_disabled(cluster) {
             	monitoringService := lib.get_default(cluster, "monitoringService", "none")
-            	monitoringService != "monitoring.googleapis.com"
+                monitoringService != "monitoring.googleapis.com"
+                monitoringService != "monitoring.googleapis.com/kubernetes"
             }
             #ENDINLINE
