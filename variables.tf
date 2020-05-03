@@ -174,6 +174,11 @@ variable "gke_istio_permissive_mtls" {
   default = false
 }
 
+variable "gke_network_policy_enable" {
+  type    = bool
+  default = false
+}
+
 variable "gke_release_channel" {
   type        = string
   default     = "STABLE"
