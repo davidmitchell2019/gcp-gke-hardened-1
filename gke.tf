@@ -22,6 +22,7 @@ module "gke" {
   services_secondary_range_name = module.gke_subnet.secondary_ip_ranges[1]["range_name"]
   istio_enable                  = var.gke_istio_enable
   istio_permissive_mtls         = var.gke_istio_permissive_mtls
+  network_policy_enable         = var.gke_network_policy_enable
   node_locations                = local.gke_node_locations
   region                        = var.region
   release_channel               = var.gke_release_channel

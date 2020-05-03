@@ -8,6 +8,7 @@ PLAN_FILE=plan-$(WS).out
 TERRAFORM_VERSION ?=0.12.8
 TERRAFORM_BIN=terraform
 TERRAFORM_BUCKET ?=$(shell cat bootstrap/terraform_bucket_name.out)
+WS ?= dev1
 WS_TFVARS=vars/ws-$(WS).tfvars
 ZONE ?= europe-west2-a
 
